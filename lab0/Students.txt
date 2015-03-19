@@ -1,0 +1,5 @@
+INT|TEXT|TEXT
+StudentID|LastName|FirstName
+123|Smith|John
+124|Taylor|Swift
+125|Emma|Stone

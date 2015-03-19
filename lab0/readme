@@ -1,0 +1,30 @@
+Usage:
+	unzip lab0.zip	
+	javac yoursql.java
+	java yoursql
+
+(Before create a new table, make sure there is no same table file that existed, e.g. if you want to
+create table Students, delete Students.txt if there exists one. ) 
+
+	CREATE TABLE Students (StudentID INT, LastName TEXT, FirstName TEXT);
+	INSERT INTO Students VALUES (123, Smith, John);
+	INSERT INTO Students VALUES (124, Emma, Stone);
+	SELECT * from Students; 	(or SELECT StudentID from Students;) 
+	
+Explanation: 
+1. If create a table which is already existed, then there is an exception. 
+So manually delete the old table(file) if you want to create a new table with the same name.
+2. Command line is case insensitive, and it will ignore leading/trailing spaces in command line. 
+3. Type in "exit()" to exit from the application.  
+4. The format of table saved in file:
+StudentID|LastName|FirstName
+123|Smith|John
+124|Emma|Stone
+
+
+ 
+
+ 
+ 
+
+	 
