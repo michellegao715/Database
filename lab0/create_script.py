@@ -7,15 +7,17 @@ if __name__ == '__main__':
   attr_list = firstline.split(',')
   new_line = ''
   
-  for l in attr_list:
+  for l in attr_list[:(len(attr_list)-1)]:
     l = l[1:len(l)-1]
-    l += ' TEXT,' 
+    l += ' TEXT, ' 
     new_line += l 
+  l = attr_list[len(attr_list)-1]
+  l = l[1:len(l)-1]
+  l += ' TEXT' 
+  new_line += l
   
-  
-  print new_line[1:len(new_line)-1]
   new_f = open(argv[2], 'w')
-  new_f.write(new_line[:len(new_line)-1])
+  new_f.write(new_line[:len(new_line)])
   new_f.close()
 
 
