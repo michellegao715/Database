@@ -26,6 +26,6 @@ file:part_physician_script.sql
 python create_script.py part_physician.csv part_physician_script.sql PartPhysician 
 2. Then run yoursql to CREATE_TABLE/INSERT and return a new file: PartPhysician.txt 
 java yoursql -init part_physician_script.sql PartPhysician 
-3. Indexing:  
+3. Indexing  
 
 	 
