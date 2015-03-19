@@ -194,18 +194,21 @@ public class yoursql {
 		if(file == null) {
 			System.err.println("Table "+file.toString()+" not existed.");
 		}
-		if(typeCheck(new File(file),types)) {
+		// TODO don't do typecheck at this time 
+		//if(typeCheck(new File(file),types)) {
 			try {
 				ArrayList<String> attrType = null;
 				writeToFile(tableName,attrType,res); //pass a null list of types if write content into files.
 			} catch (IOException e) {
 				System.err.println("exception when insertIntoTable");
 			}
-		}else {
+	//TODO don't do typecheck at this time 	
+	 /*	}else {
 			System.err.println("wrong type to insert into table");
 			System.exit(0);
-		}
+		} */ 
 	}
+	
 	//check if types of contents are same to attributes' types in tableFile(store in first line of tableFile) 
 	private static boolean typeCheck(File tableFile, ArrayList<Attribute> types) {
 		BufferedReader br;
@@ -309,7 +312,7 @@ public class yoursql {
 				String init = args[0]; 
 				String file = args[1];
 				File f = new File(yoursql.class.getProtectionDomain().getCodeSource().getLocation().getPath());
-				if(!init.equals("-init") || !file.equals("script.sql")) {
+				if(!init.equals("-init") || !file.equals("part_physician_script.sql")) {
 					System.err.println("wrong format of file input");	
 					System.exit(0);
 				}
