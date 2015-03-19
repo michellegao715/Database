@@ -20,11 +20,12 @@ So manually delete the old table(file) if you want to create a new table with th
 StudentID|LastName|FirstName
 123|Smith|John
 124|Emma|Stone
-
-
- 
-
- 
- 
+--------------------------------------------------------------------------
+1. Create a script.sql:(use part_physician.csv for testing) and return a new
+file:part_physician_script.sql  
+python create_script.py part_physician.csv part_physician_script.sql PartPhysician 
+2. Then run yoursql to CREATE_TABLE/INSERT and return a new file: PartPhysician.txt 
+java yoursql -init part_physician_script.sql PartPhysician 
+3. Indexing:  
 
 	 
