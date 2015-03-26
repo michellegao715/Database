@@ -19,6 +19,7 @@ public class yoursql {
 	public static final String createPattern = "(?i)(CREATE TABLE )([0-9a-zA-Z_]*)(.*)";
 	public static final String insertPattern = "(?i)(INSERT INTO )([0-9a-zA-Z_]*)( VALUES )(.*)";
 	public static final String selectPattern = "(?i)(SELECT )([0-9a-zA-Z_]*|[\\*])( from )([0-9a-zA-Z_]*);";
+	public static final String selectSearchPattern = "(?i)(SELECT )([0-9a-zA-Z_]*|[\\*])( from )([0-9a-zA-Z_]*)( where )([0-9a-zA-Z_]*)(=)(\")([0-9a-zA-Z_]*)(\");";	
 
 	private static ArrayList<String> getInsertData(String cmd) {
 		ArrayList<String> res = new ArrayList<String>();
@@ -284,8 +285,9 @@ public class yoursql {
 			BufferedReader input = new BufferedReader(in);
 			String cmd = "";
 			int count = args.length;
-			String tableName = args[1];
-			if(count == 2){
+			System.out.println("num of args is "+count);
+			//String tableName = args[0];
+			if(count == 0){
 				while(true){
 					System.out.print(">>>");
 					if((cmd = input.readLine())!=null){
@@ -295,8 +297,11 @@ public class yoursql {
 						}
 						else if (cmd.startsWith("INSERT INTO")){
 							insertIntoTable(cmd);
-						}else if (cmd.startsWith("SELECT")){
-							selectFromTable(cmd);
+						}else if (cmd.startsWith("SELECT * FROM")){
+							SelectAndSearch s = new SelectAndSearch();
+							s.selectAndSearch(cmd);
+							System.exit(0);
+							//selectFromTable(cmd);
 						}else if (cmd.equals("exit()")){
 							System.exit(0);
 						}else {

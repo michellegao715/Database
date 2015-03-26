@@ -1,4 +1,4 @@
-viimport java.io.BufferedReader;
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -19,6 +19,7 @@ public class yoursql {
 	public static final String createPattern = "(?i)(CREATE TABLE )([0-9a-zA-Z_]*)(.*)";
 	public static final String insertPattern = "(?i)(INSERT INTO )([0-9a-zA-Z_]*)( VALUES )(.*)";
 	public static final String selectPattern = "(?i)(SELECT )([0-9a-zA-Z_]*|[\\*])( from )([0-9a-zA-Z_]*);";
+	public static final String selectSearchPattern = "(?i)(SELECT )([0-9a-zA-Z_]*|[\\*])( from )([0-9a-zA-Z_]*)( where )([0-9a-zA-Z_]*)(=)(\")([0-9a-zA-Z_]*)(\");";	
 
 	private static ArrayList<String> getInsertData(String cmd) {
 		ArrayList<String> res = new ArrayList<String>();
@@ -194,21 +195,18 @@ public class yoursql {
 		if(file == null) {
 			System.err.println("Table "+file.toString()+" not existed.");
 		}
-		// TODO don't do typecheck at this time 
-		//if(typeCheck(new File(file),types)) {
+		if(typeCheck(new File(file),types)) {
 			try {
 				ArrayList<String> attrType = null;
 				writeToFile(tableName,attrType,res); //pass a null list of types if write content into files.
 			} catch (IOException e) {
 				System.err.println("exception when insertIntoTable");
 			}
-	//TODO don't do typecheck at this time 	
-	 /*	}else {
+		}else {
 			System.err.println("wrong type to insert into table");
 			System.exit(0);
-		} */ 
+		}
 	}
-	
 	//check if types of contents are same to attributes' types in tableFile(store in first line of tableFile) 
 	private static boolean typeCheck(File tableFile, ArrayList<Attribute> types) {
 		BufferedReader br;
@@ -287,8 +285,9 @@ public class yoursql {
 			BufferedReader input = new BufferedReader(in);
 			String cmd = "";
 			int count = args.length;
-			String tableName = args[1];
-			if(count == 2){
+			System.out.println("num of args is "+count);
+			//String tableName = args[0];
+			if(count == 0){
 				while(true){
 					System.out.print(">>>");
 					if((cmd = input.readLine())!=null){
@@ -298,8 +297,11 @@ public class yoursql {
 						}
 						else if (cmd.startsWith("INSERT INTO")){
 							insertIntoTable(cmd);
-						}else if (cmd.startsWith("SELECT")){
-							selectFromTable(cmd);
+						}else if (cmd.startsWith("SELECT * FROM")){
+							SelectAndSearch s = new SelectAndSearch();
+							s.selectAndSearch(cmd);
+							System.exit(0);
+							//selectFromTable(cmd);
 						}else if (cmd.equals("exit()")){
 							System.exit(0);
 						}else {
@@ -312,7 +314,7 @@ public class yoursql {
 				String init = args[0]; 
 				String file = args[1];
 				File f = new File(yoursql.class.getProtectionDomain().getCodeSource().getLocation().getPath());
-				if(!init.equals("-init") || !file.equals("part_physician_script.sql")) {
+				if(!init.equals("-init") || !file.equals("script.sql")) {
 					System.err.println("wrong format of file input");	
 					System.exit(0);
 				}

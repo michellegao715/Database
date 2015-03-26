@@ -55,7 +55,7 @@ public class HashIndex {
 		int i = 0;
 		while(i < a.length){
 			if(a[i].equals(key)){
-				System.out.println("the index of "+key+" in attr_line is:"+i);
+				//System.out.println("the index of "+key+" in attr_line is:"+i);
 				return i;
 			}
 			i++;

@@ -1,29 +1,26 @@
-
-
-#####################
-only work in /CS686/Database/lab0, and copy files to this directory to push to github 
-
-
-Usage:
+1.Files:
 1.Before compile and run the program, make sure you have those files in the same directory:
 All the csv files: 
 OPPR_ALL_DTL_GNRL_12192014.csv 
 OPPR_SPLMTL_PH_PRFL_12192014.csv
 OPPR_ALL_DTL_OWNRSHP_12192014.csv
 OPPR_ALL_DTL_RSRCH_12192014.csv 
+External jar: opencsv-3.3.jar 
+Java Files:  yousql.java SelectAndSearch.java  HashIndex.java 
 
-External jar:
-opencsv-3.3.jar 
+2. Usage:
+	javac -cp .:opencsv-3.3.jar yoursql.java
+	java -cp .:opencsv-3.3.jar yoursql
+>>>  (Then type in select query: choose any from Performance and Evaluation) 
+	SELECT * FROM Ownership WHERE Physician_Last_Name=LIN;  
+>>>  (Printing out the searching result) 
+>>>  (After each query, the program will exit, and you need to manually delete the indexed files genereated: e.g. if you test with table Physician: then Physicians_*, if test with table Ownership: Ownership_* ) 
 
-Java Files: 
-SelectAndSearch.java 
-HashIndex.java 
-
-
-
-2. Use opencsv to parse csv files: opencsv-3.3.jar
-	javac -cp .:opencsv-3.3.jar SelectionAndSearch.java
-	// TODO 
+Usage Example:
+	Test for the biggest csv files: 
+	javac -cp .:opencsv-3.3.jar yoursql.java
+	java -cp .:opencsv-3.3.jar yoursql 
+	SELECT * FROM Physicians WHERE Physician_Last_Name=LIN;  
 
 3.After each running: delete all hash index file:
 Physician_xx  
@@ -32,34 +29,35 @@ Payments_xx
 If there is no searching result or typing wrong tablename or search value, the program will print out error and break. 
 
 5. Performance and Evaluation
-1.Search from Physician table:(OPPR_SPLMTL_PH_PRFL_12192014.csv 1.3G)
-SELECT * from Physicians WHERE Physician_Last_Name=LIN;
-1.3G --> time cost: 227s
+Physician Search: 
+  1.Search from Physician table:(OPPR_SPLMTL_PH_PRFL_12192014.csv 1.3G)
+SELECT * FROM Physicians WHERE Physician_Last_Name=LIN;
+1.3G --> time cost: 217s
 
-2.Search from Ownership table: (OPPR_ALL_DTL_OWNRSHP_12192014.csv 1.5M)
-SELECT * from Ownership WHERE Physician_Last_Name=LIN;
+  2.Search from Ownership table: (OPPR_ALL_DTL_OWNRSHP_12192014.csv 1.5M)
+SELECT * FROM Ownership WHERE Physician_Last_Name=LIN;
 1.5M --> 0s 
 
-3.Search from Payments table: (OPPR_ALL_DTL_GNRL_12192014.csv 493M)
-SELECT * from Payments WHERE Physician_Last_Name=LIN;
-493M --> 86s  
+  3.Search from Payments table: (OPPR_ALL_DTL_GNRL_12192014.csv 493M)
+SELECT * FROM Payments WHERE Physician_Last_Name=LIN;
+493M --> 81s
 
-4.Search from Research table: (OPPR_ALL_DTL_RSRCH_12192014.csv 13M) 
-SELECT * from Research WHERE Physician_Last_Name=LIN;
+  4.Search from Research table: (OPPR_ALL_DTL_RSRCH_12192014.csv 13M) 
+SELECT * FROM Research WHERE Physician_Last_Name=LIN;
 13M --> 2s  
 
-Vendor Search:( SELECT * FROM Payments(or Ownership, or Research) WHERE
-1.search from Ownership table:(OPPR_ALL_DTL_OWNRSHP_12192014.csv 1.5M) 
+Vendor Search:
+  1.Search from Ownership table:(OPPR_ALL_DTL_OWNRSHP_12192014.csv 1.5M) 
 SELECT * FROM Ownership WHERE Applicable_Manufacturer_or_Applicable_GPO_Making_Payment_Name=OmniGuide, Inc.; 
 1.5M --> time cost: 0s 
 
-2. search from Research table:( OPPR_ALL_DTL_RSRCH_12192014.csv 13M)
+  2.Search from Research table:( OPPR_ALL_DTL_RSRCH_12192014.csv 13M)
 SELECT * FROM Research WHERE Applicable_Manufacturer_or_Applicable_GPO_Making_Payment_Name=Amgen Inc.;
 13M --> time cost: 2s
 
-3. search from Payments table:( OPPR_ALL_DTL_GNRL_12192014.csv 493M) 
-SELECT * FROM Payments(or Ownership, or Research) WHERE Applicable_Manufacturer_or_Applicable_GPO_Making_Payment_Name=BIOLASE, INC.;)
-493M --> time cost:74s 
+  3.Search from Payments table:( OPPR_ALL_DTL_GNRL_12192014.csv 493M) 
+SELECT * FROM Payments WHERE Applicable_Manufacturer_or_Applicable_GPO_Making_Payment_Name=BIOLASE, INC.;
+493M --> time cost:67s
 
 
 Design:

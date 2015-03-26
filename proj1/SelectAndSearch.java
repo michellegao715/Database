@@ -16,7 +16,7 @@ public class SelectAndSearch{
 			if(m.find()) {
 				String tablename = m.group(4);
 				String searchkey = m.group(6);
-				System.out.println(searchkey);
+				//System.out.println(searchkey);
 				String searchvalue = m.group(8);	
 				keys[0] = tablename; 
 				keys[1]= searchkey;
@@ -41,12 +41,33 @@ public class SelectAndSearch{
 		}
 		return filename;
 	}
+	
+	public static void selectAndSearch(String cmd){
+		String[] search_keys = get_search_keys(cmd);
+		String tablename = search_keys[0];
+		System.out.println(">>>Tablename of your searching is:"+tablename);
+		String filename = get_filename(tablename);
+		System.out.println(">>>Filename of your searching:"+filename);
+		String key = search_keys[1];
+		System.out.println(">>>Searching key is "+key);
+		String value = search_keys[2];
+		System.out.println(">>>Searching value is "+value);
+		System.out.println("Start searching");
+		HashIndex t = new HashIndex();
+		long startTime = System.currentTimeMillis();
+		t.hashIndex(key,filename,tablename);
+		System.out.println("Finish indexing");
+		System.out.println("Start searching");
+		t.search_select(tablename, key, value);
+		long endTime   = System.currentTimeMillis();
+		long totalTime = (endTime-startTime)/1000; 
+		System.out.println("Finish searching");
+		System.out.println("Finish searching in "+totalTime+"seconds");
+	}
 	//java SelectAndSearch SELECT * FROM table_name WHERE Physician_Last_name=Michelle";
-	public static void main(String[] args){
+/* 	public static void main(String[] args){
 		String cmd = args[0];
 		String[] search_keys = get_search_keys(cmd);
-		//SELECT * FROM table_name WHERE Applicable_Manufacturer_or_Applicable_GPO_Making_Payment_Name="vendor_name". 
-		//SELECT * FROM table_name WHERE Physician_Last_name="name"
 		String tablename = search_keys[0];
 		System.out.println("Tablename of your searching:"+tablename);
 		String filename = get_filename(tablename);
@@ -66,6 +87,6 @@ public class SelectAndSearch{
 		long totalTime = (endTime-startTime)/1000; 
 		System.out.println("Finish searching");
 		System.out.println("Finish searching in "+totalTime+"seconds");
-	}
+	} */
 }
 
