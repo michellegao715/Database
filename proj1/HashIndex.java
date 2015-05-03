@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.ArrayList;
 
 import com.opencsv.CSVParser;
 import com.opencsv.CSVReader;
@@ -13,6 +14,12 @@ import com.opencsv.CSVReader;
 
 public class HashIndex {
 	private static final String tab = "\t";
+
+	private static int hashSize = 128;
+
+	private static int bufferSize = 100;
+
+	/* 
 	public static int hashcode(String name){
 		char[] array = name.toCharArray();
 		int sum = 0;
@@ -21,6 +28,12 @@ public class HashIndex {
 		}
 		int prime = 31;
 		return sum%prime; 
+	} */
+	public static int hashcode(String name){
+		if (name.length() == 0)
+			return 0;
+		char c = name.charAt(0);
+		return (int)c % hashSize;
 	}
 
 	// "/Users/MichelleGao/Documents/workspace/CS686/lab0/test.csv"
@@ -75,8 +88,25 @@ public class HashIndex {
 		}
 		String attr_line = getFirstLine(filename);
 		//System.out.println("the index of Physician_Last_Name is:"+position);
+
 		CSVReader reader;
 		try {
+			ArrayList<BufferedWriter> outputs = new ArrayList<BufferedWriter>();
+			ArrayList<StringBuilder> builders = new ArrayList<StringBuilder>();
+			int[] counters = new int[hashSize];
+			for (int i = 0;i < hashSize; ++i) {
+				String index_file_name = tablename+"_"+i;
+				File index_file = new File(index_file_name);
+				index_file.createNewFile();
+				FileWriter fw = new FileWriter(index_file.getAbsolutePath(),true);
+				BufferedWriter out = new BufferedWriter(fw);
+				out.write(attr_line);
+				out.newLine();
+				outputs.add(out);
+				builders.add(new StringBuilder());
+				counters[i] = 0;
+			}
+
 			reader = new CSVReader(new FileReader(filename), CSVParser.DEFAULT_SEPARATOR, CSVParser.DEFAULT_QUOTE_CHARACTER,1);
 			String[] lines;  
 			while ((lines = reader.readNext()) != null) {
@@ -92,22 +122,38 @@ public class HashIndex {
 					index = Math.abs(hashcode(lines[position]));
 					//System.out.println("the hashed index of physician_last_name "+lines[position]+" is:"+index);
 				}
+
 				//write one line into file: tablename_index 
-				String index_file_name = tablename+"_"+index;
-				File index_file = new File(index_file_name);
-				if(!index_file.exists()) {
-					index_file.createNewFile();
-					FileWriter fw = new FileWriter(index_file.getAbsolutePath(),true);
-					BufferedWriter out = new BufferedWriter(fw);
-					out.write(attr_line);
-					out.newLine();
-					out.close();
-				} 
-				FileWriter fw = new FileWriter(index_file.getAbsolutePath(),true);
-				BufferedWriter out = new BufferedWriter(fw);
-				out.write(line);
-				out.newLine();
-				out.close();
+				// String index_file_name = tablename+"_"+index;
+				// File index_file = new File(index_file_name);
+				// if(!index_file.exists()) {
+				// 	index_file.createNewFile();
+				// 	FileWriter fw = new FileWriter(index_file.getAbsolutePath(),true);
+				// 	BufferedWriter out = new BufferedWriter(fw);
+				// 	out.write(attr_line);
+				// 	out.newLine();
+				// 	out.close();
+				// } 
+				// FileWriter fw = new FileWriter(index_file.getAbsolutePath(),true);
+				// BufferedWriter out = new BufferedWriter(fw);
+				// out.write(line);
+				// out.newLine();
+				// out.close();
+
+				//builders.get(index).append(line);
+				//builders.get(index).append("\n");
+				//if (counters[index]++ == bufferSize) {
+				//	outputs.get(index).write(builders.get(index).toString());
+				//	builders.get(index).setLength(0);
+				//	counters[index] = 0;
+				//}
+				outputs.get(index).write(line);
+				outputs.get(index).newLine();
+			}
+
+			for (int i = 0;i < hashSize; ++i) {
+				//outputs.get(i).write(builders.get(i).toString());
+				outputs.get(i).close();
 			}
 		}
 		catch (FileNotFoundException e) {

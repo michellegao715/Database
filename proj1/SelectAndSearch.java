@@ -4,7 +4,7 @@ import java.util.regex.Pattern;
 //SELECT * FROM table_name WHERE Physician_Last_name="name"  
 //SELECT * FROM table_name WHERE Applicable_Manufacturer_or_Applicable_GPO_Making_Payment_Name="vendor_name"
 public class SelectAndSearch{
-	public static final String selectPattern = "(?i)(SELECT )([0-9a-zA-Z_]*|[\\*])( from )([0-9a-zA-Z_]*)( where )([0-9a-zA-Z_]*)(=)([a-zA-Z0-9][a-zA-Z0-9,. ]+);";
+	public static final String selectPattern = "(?i)(SELECT )([0-9a-zA-Z_]*|[\\*])( from )([0-9a-zA-Z_]*)( where )([0-9a-zA-Z_]*)(=)([a-zA-Z0-9][a-zA-Z0-9,_. ]+);";
 	//[tablename, searchkey, searchvalue]: [Physician, Physician_Last_Name, "Michelle"] 
 	public static String[] get_search_keys(String cmd){
 		Pattern r;
@@ -52,11 +52,18 @@ public class SelectAndSearch{
 		System.out.println(">>>Searching key is "+key);
 		String value = search_keys[2];
 		System.out.println(">>>Searching value is "+value);
-		System.out.println("Start searching");
+		System.out.println("Start building index files:");
 		HashIndex t = new HashIndex();
 		long startTime = System.currentTimeMillis();
 		t.hashIndex(key,filename,tablename);
 		System.out.println("Finish indexing");
+		long indexTime = System.currentTimeMillis();
+		System.out.println("Index file generating time:"+(indexTime-startTime)/1000+"seconds");
+		try{
+			Thread.sleep(4000);
+		}catch(Exception e){
+			System.err.println("InterruptedException");
+		}
 		System.out.println("Start searching");
 		t.search_select(tablename, key, value);
 		long endTime   = System.currentTimeMillis();

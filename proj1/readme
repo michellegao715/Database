@@ -53,6 +53,7 @@ SELECT * FROM Ownership WHERE Applicable_Manufacturer_or_Applicable_GPO_Making_P
 
   2.Search from Research table:( OPPR_ALL_DTL_RSRCH_12192014.csv 13M)
 SELECT * FROM Research WHERE Applicable_Manufacturer_or_Applicable_GPO_Making_Payment_Name=Amgen Inc.;
+SELECT * FROM Research WHERE Applicable_Manufacturer_or_Applicable_GPO_Making_Payment_Name=NovaBay_Pharmaceuticals,_Inc.;
 13M --> time cost: 2s
 
   3.Search from Payments table:( OPPR_ALL_DTL_GNRL_12192014.csv 493M) 
