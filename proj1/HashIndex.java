@@ -11,13 +11,12 @@ import java.util.ArrayList;
 import com.opencsv.CSVParser;
 import com.opencsv.CSVReader;
 
-
+// TODO   Have to remove all indexed files any time before run the program. 
 public class HashIndex {
 	private static final String tab = "\t";
 
 	private static int hashSize = 128;
 
-	private static int bufferSize = 100;
 
 	/* 
 	public static int hashcode(String name){
@@ -36,7 +35,6 @@ public class HashIndex {
 		return (int)c % hashSize;
 	}
 
-	// "/Users/MichelleGao/Documents/workspace/CS686/lab0/test.csv"
 	@SuppressWarnings("resource")
 	public static String getFirstLine(String filename){
 		CSVReader reader;
@@ -57,9 +55,6 @@ public class HashIndex {
 	}
 	public static int getIndexOfKey(String searchKey, String attr_line){
 		String[] attr = attr_line.split(tab);
-		/* for(String s : attr){
-			System.out.print(s+"$$$");
-		}*/ 
 		return search(searchKey, attr);
 	}
 
@@ -68,7 +63,6 @@ public class HashIndex {
 		int i = 0;
 		while(i < a.length){
 			if(a[i].equals(key)){
-				//System.out.println("the index of "+key+" in attr_line is:"+i);
 				return i;
 			}
 			i++;
@@ -92,8 +86,6 @@ public class HashIndex {
 		CSVReader reader;
 		try {
 			ArrayList<BufferedWriter> outputs = new ArrayList<BufferedWriter>();
-			ArrayList<StringBuilder> builders = new ArrayList<StringBuilder>();
-			int[] counters = new int[hashSize];
 			for (int i = 0;i < hashSize; ++i) {
 				String index_file_name = tablename+"_"+i;
 				File index_file = new File(index_file_name);
@@ -103,8 +95,6 @@ public class HashIndex {
 				out.write(attr_line);
 				out.newLine();
 				outputs.add(out);
-				builders.add(new StringBuilder());
-				counters[i] = 0;
 			}
 
 			reader = new CSVReader(new FileReader(filename), CSVParser.DEFAULT_SEPARATOR, CSVParser.DEFAULT_QUOTE_CHARACTER,1);
@@ -122,31 +112,6 @@ public class HashIndex {
 					index = Math.abs(hashcode(lines[position]));
 					//System.out.println("the hashed index of physician_last_name "+lines[position]+" is:"+index);
 				}
-
-				//write one line into file: tablename_index 
-				// String index_file_name = tablename+"_"+index;
-				// File index_file = new File(index_file_name);
-				// if(!index_file.exists()) {
-				// 	index_file.createNewFile();
-				// 	FileWriter fw = new FileWriter(index_file.getAbsolutePath(),true);
-				// 	BufferedWriter out = new BufferedWriter(fw);
-				// 	out.write(attr_line);
-				// 	out.newLine();
-				// 	out.close();
-				// } 
-				// FileWriter fw = new FileWriter(index_file.getAbsolutePath(),true);
-				// BufferedWriter out = new BufferedWriter(fw);
-				// out.write(line);
-				// out.newLine();
-				// out.close();
-
-				//builders.get(index).append(line);
-				//builders.get(index).append("\n");
-				//if (counters[index]++ == bufferSize) {
-				//	outputs.get(index).write(builders.get(index).toString());
-				//	builders.get(index).setLength(0);
-				//	counters[index] = 0;
-				//}
 				outputs.get(index).write(line);
 				outputs.get(index).newLine();
 			}
@@ -162,64 +127,75 @@ public class HashIndex {
 			System.out.println("IOException:"+e.toString());
 		}
 	}
-	//SELECT * FROM table_name WHERE Physician_Last_name="name"
-	// search(Physician, Physician_Last_Name, Adlow)   should 
-	public static void search_select(String tablename, String key, String value){
-		boolean found = false;//set this value to true when find any matching result
-		int target_hash_index= hashcode(value);
-		String file_to_search = tablename+"_"+target_hash_index;
-		File f = new File(file_to_search);
-		BufferedReader reader = null;
-		String attr_line = "";
-		String line = "";
-		int index=-1; //index of Physician_Last_Name in attr_line
+	// iterate through each line of outerTable(read from csv), hash the value of the attribute and search in index files of inner table
+	public static void join(String innerTable, String outerTable,String innerFile, String outerFile, String innerKey, String outerKey){
+		String attributeLineOuter = getFirstLine(outerFile);
+		String attributeLineInner = getFirstLine(innerFile);
+		int posKeyOuter= getIndexOfKey(outerKey, attributeLineOuter);
+		int posKeyInner = getIndexOfKey(innerKey, attributeLineInner);
+		System.out.println("pos of "+outerKey+" in "+outerFile+" is:"+posKeyOuter);
+		System.out.println("pos of "+innerKey+" in "+innerFile+" is:"+posKeyInner);
+
+		if(posKeyOuter < 0) {
+			System.err.println(">>>Failed to find the attribute "+outerKey+" in the table "+outerTable);
+			System.exit(1);
+		}
+		CSVReader reader;
+		boolean found = false;
+		String innerJoinFile = "";
+		BufferedReader innerReader= null;
 		try {
-			reader = new BufferedReader(new FileReader(f));
-			attr_line = reader.readLine();
-			index = getIndexOfKey(key,attr_line);
-			//int i = 0;
-			while ((line = reader.readLine()) != null) {
-			/*	if ( i == 0) {
-					String[] temp = line.split(tab);
-					for ( String s : temp) {
-						System.out.print(s+"$$$");
+			reader = new CSVReader(new FileReader(outerFile), CSVParser.DEFAULT_SEPARATOR, CSVParser.DEFAULT_QUOTE_CHARACTER,1); //skip first line 
+		String[] outerLine;
+		while((outerLine = reader.readNext()) != null){
+			int targetHash = Math.abs(hashcode(outerLine[posKeyOuter]));
+			innerJoinFile = innerTable+"_"+targetHash;
+			File indexFile= new File(innerJoinFile);
+			String l = "";
+			innerReader = new BufferedReader(new FileReader(indexFile));
+			while((l = innerReader.readLine()) != null ){
+				String[] innerLine = l.split(tab);
+				if(innerLine[posKeyInner].length() >0 && outerLine[posKeyOuter].length()>0 && innerLine[posKeyInner].equalsIgnoreCase(outerLine[posKeyOuter])){
+				// TODO use a buffer to save matching join and print out later					
+					found = true;
+					System.out.println(">>>Matching join:");
+					System.out.println("---Inner Matching:"+Arrays.toString(innerLine));
+					System.out.println("---Outer Matching:"+Arrays.toString(outerLine));
 					}
 				}
-				i++;*/
-				String[] lines = line.split(tab);
-				if(lines[index].equals(value)) {
-					found = true;
-					System.out.println(">>>Found matching physician:");
-					System.out.println(line);
-				}
 			}
-		} catch (FileNotFoundException e) {
-			System.out.println("Can't open:"+file_to_search);
-		} catch (IOException e) {
-			e.printStackTrace();
-		} finally {
-			if(found == false) {
-				System.out.println(">>>No matching datas");
+		}catch(FileNotFoundException e){
+				System.out.println("Can't open:"+innerJoinFile);
+		}catch(IOException e){
+				e.printStackTrace();
+		}finally{
+			if(found == false)
+			System.out.println(">>>No matching join found");
 			try {
-				if (reader != null) {
-					reader.close();
+				if (innerReader != null) {
+					innerReader.close();
 				}
 			} catch (IOException e) {
+				System.out.println("IOException when closing innerReader");
 			}
-		}
+		}	
 	}
-}
-
+	// SELECT * FROM Payments p, Physicians r WHERE p.Physician_Last_Name = r.Physician_Last_Name
 	public static void main(String[] args) throws IOException, InterruptedException{
-		String tablename = "Physician";
-		String filename = "oppr_ownership.csv";
-		String key = "Physician_Last_Name"; 
-		String value = "Yakubov"; 
-		//filename = OPPR_ALL_DTL_OWNRSHP_12192014.csv; String key = "Applicable_Manufacturer_or_Applicable_GPO_Making_Payment_Name"; String value = "Safco Dental Supply Co."; 
-		//filename = oppr_research.csv;  String key = "Applicable_Manufacturer_or_Applicable_GPO_Making_Payment_Name"; string value= "ELI LILLY AND COMPANY" 
-		//String key = "Applicable_Manufacturer_or_Applicable_GPO_Making_Payment_Name"; String value = "ELI LILLY AND COMPANY"; String filename = "/Users/MichelleGao/Documents/workspace/CS686/lab0/oppr_research.csv";
-		hashIndex(key,filename,tablename);
-		search_select(tablename,key,value);
-		
+		String innerT = "Ownership";
+		String outerT = "Research";
+		//String innerK= "Physician_Last_Name"; 
+		//String outerK = "Physician_Last_Name";		
+		String innerK = "Applicable_Manufacturer_or_Applicable_GPO_Making_Payment_Name";
+		String outerK = "Applicable_Manufacturer_or_Applicable_GPO_Making_Payment_Name";
+		//String outerFile = "10lineOwnership.csv";
+		//String innerFile = "10lineResearch.csv";	
+		 
+		String outerFile= "OPPR_ALL_DTL_RSRCH_12192014.csv";
+		String innerFile = "OPPR_ALL_DTL_OWNRSHP_12192014.csv";
+		 
+//String key = "Applicable_Manufacturer_or_Applicable_GPO_Making_Payment_Name"; String value = "Safco Dental Supply Co."; 
+		hashIndex(innerK,innerFile,innerT);
+		join(innerT,outerT, innerFile, outerFile,innerK,outerK);		
 	}
 }
