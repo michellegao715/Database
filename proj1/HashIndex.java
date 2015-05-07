@@ -12,11 +12,12 @@ import com.opencsv.CSVParser;
 import com.opencsv.CSVReader;
 
 // TODO   Have to remove all indexed files any time before run the program. 
+// TODO smaller file is inner join, bigger file is outer join. 
 public class HashIndex {
 	private static final String tab = "\t";
-
+	private static int counter = 0;
 	private static int hashSize = 128;
-
+	private static final String seperator = "  ";
 
 	/* 
 	public static int hashcode(String name){
@@ -129,12 +130,13 @@ public class HashIndex {
 	}
 	// iterate through each line of outerTable(read from csv), hash the value of the attribute and search in index files of inner table
 	public static void join(String innerTable, String outerTable,String innerFile, String outerFile, String innerKey, String outerKey){
+		long joinTime = System.currentTimeMillis();
 		String attributeLineOuter = getFirstLine(outerFile);
 		String attributeLineInner = getFirstLine(innerFile);
 		int posKeyOuter= getIndexOfKey(outerKey, attributeLineOuter);
 		int posKeyInner = getIndexOfKey(innerKey, attributeLineInner);
-		System.out.println("pos of "+outerKey+" in "+outerFile+" is:"+posKeyOuter);
-		System.out.println("pos of "+innerKey+" in "+innerFile+" is:"+posKeyInner);
+		//System.out.println("pos of "+outerKey+" in "+outerFile+" is:"+posKeyOuter);
+		//System.out.println("pos of "+innerKey+" in "+innerFile+" is:"+posKeyInner);
 
 		if(posKeyOuter < 0) {
 			System.err.println(">>>Failed to find the attribute "+outerKey+" in the table "+outerTable);
@@ -146,56 +148,78 @@ public class HashIndex {
 		BufferedReader innerReader= null;
 		try {
 			reader = new CSVReader(new FileReader(outerFile), CSVParser.DEFAULT_SEPARATOR, CSVParser.DEFAULT_QUOTE_CHARACTER,1); //skip first line 
-		String[] outerLine;
-		while((outerLine = reader.readNext()) != null){
-			int targetHash = Math.abs(hashcode(outerLine[posKeyOuter]));
-			innerJoinFile = innerTable+"_"+targetHash;
-			File indexFile= new File(innerJoinFile);
-			String l = "";
-			innerReader = new BufferedReader(new FileReader(indexFile));
-			while((l = innerReader.readLine()) != null ){
-				String[] innerLine = l.split(tab);
-				if(innerLine[posKeyInner].length() >0 && outerLine[posKeyOuter].length()>0 && innerLine[posKeyInner].equalsIgnoreCase(outerLine[posKeyOuter])){
-				// TODO use a buffer to save matching join and print out later					
-					found = true;
-					System.out.println(">>>Matching join:");
-					System.out.println("---Inner Matching:"+Arrays.toString(innerLine));
-					System.out.println("---Outer Matching:"+Arrays.toString(outerLine));
+	 		String[] outerLine;
+			while((outerLine = reader.readNext()) != null){
+				StringBuilder matchingResults= new StringBuilder();
+				/*Ignore if the value of the tuple outerLine[posKeyOuter] is empty or null.*/
+				if(outerLine[posKeyOuter].length() == 0) continue;
+				/*Add entry of outer table */
+				for(int i = 0; i<outerLine.length;i++){
+					if(i == posKeyOuter) continue;
+					matchingResults.append(outerLine[i]+seperator);
+				}
+				//System.out.println(matchingResults.toString());
+				int targetHash = Math.abs(hashcode(outerLine[posKeyOuter]));
+				innerJoinFile = innerTable+"_"+targetHash;
+				String l = "";
+				innerReader = new BufferedReader(new FileReader(innerJoinFile));
+				while((l = innerReader.readLine()) != null ){
+					String[] innerLine = l.split(tab);
+					/*Ignore if the value is null or empty*/
+					if(innerLine[posKeyInner].length() == 0) continue;
+					//if(innerLine[posKeyInner].length() >0 && outerLine[posKeyOuter].length()>0 && innerLine[posKeyInner].equalsIgnoreCase(outerLine[posKeyOuter])){
+					if(innerLine[posKeyInner].equalsIgnoreCase(outerLine[posKeyOuter])){
+						found = true;
+						System.out.println(">>>Matching join by :"+outerLine[posKeyOuter]+"........");
+						System.out.print(matchingResults.toString());
+						System.out.print(l+"\n");
+						counter = counter+1;
+						}
 					}
 				}
-			}
-		}catch(FileNotFoundException e){
+			long endTime   = System.currentTimeMillis();
+			long join = (endTime-joinTime)/1000;
+			System.out.println("Finish joining in "+join+"seconds( include time cost of printing)");
+			//System.out.println("Number of matching entries is "+counter);
+			}catch(FileNotFoundException e){
 				System.out.println("Can't open:"+innerJoinFile);
-		}catch(IOException e){
+			}catch(IOException e){
 				e.printStackTrace();
-		}finally{
-			if(found == false)
-			System.out.println(">>>No matching join found");
-			try {
-				if (innerReader != null) {
+			}finally{
+				if(found == false)
+				System.out.println(">>>No matching join found");
+				try {
+					if (innerReader != null) {
 					innerReader.close();
+					}
+				} catch (IOException e) {
+					System.out.println("IOException when closing innerReader");
 				}
-			} catch (IOException e) {
-				System.out.println("IOException when closing innerReader");
-			}
-		}	
-	}
-	// SELECT * FROM Payments p, Physicians r WHERE p.Physician_Last_Name = r.Physician_Last_Name
-	public static void main(String[] args) throws IOException, InterruptedException{
+			}	
+		}
+	/* public static void main(String[] args) throws IOException, InterruptedException{
 		String innerT = "Ownership";
 		String outerT = "Research";
-		//String innerK= "Physician_Last_Name"; 
-		//String outerK = "Physician_Last_Name";		
-		String innerK = "Applicable_Manufacturer_or_Applicable_GPO_Making_Payment_Name";
-		String outerK = "Applicable_Manufacturer_or_Applicable_GPO_Making_Payment_Name";
-		//String outerFile = "10lineOwnership.csv";
-		//String innerFile = "10lineResearch.csv";	
+		String innerK= "Physician_Last_Name"; 
+		String outerK = "Physician_Last_Name";		
+		//String innerK = "Applicable_Manufacturer_or_Applicable_GPO_Making_Payment_Name";
+		//String outerK = "Applicable_Manufacturer_or_Applicable_GPO_Making_Payment_Name";
+		String outerFile = "10lineOwnership.csv";
+		String innerFile = "10lineResearch.csv";	
 		 
-		String outerFile= "OPPR_ALL_DTL_RSRCH_12192014.csv";
-		String innerFile = "OPPR_ALL_DTL_OWNRSHP_12192014.csv";
+		//String outerFile= "OPPR_ALL_DTL_RSRCH_12192014.csv";
+		//String innerFile = "OPPR_ALL_DTL_OWNRSHP_12192014.csv";
+		//String outerFile= "OPPR_ALL_DTL_GNRL_12192014.csv";
+		//String outerFile = "OPPR_SPLMTL_PH_PRFL_12192014.csv";
 		 
 //String key = "Applicable_Manufacturer_or_Applicable_GPO_Making_Payment_Name"; String value = "Safco Dental Supply Co."; 
 		hashIndex(innerK,innerFile,innerT);
+		long startTime = System.currentTimeMillis();
 		join(innerT,outerT, innerFile, outerFile,innerK,outerK);		
-	}
+		System.out.println("there are "+counter+" joining matches");
+		long joinTime = System.currentTimeMillis();
+		long join = (joinTime-startTime)/1000; 
+		System.out.println("Finish joining in "+join+"seconds");
+
+	} */ 
 }

@@ -1,11 +1,12 @@
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.io.File;
 
 //SELECT * FROM Payments p, Physicians r WHERE p.Physician_Last_Name = r.Physician_Last_Name 
 public class SelectAndSearch{
 	//public static final String selectPattern = "(?i)(SELECT )([0-9a-zA-Z_]*|[\\*])( from )([0-9a-zA-Z_]*)( where )([0-9a-zA-Z_]*)(=)([a-zA-Z0-9][a-zA-Z0-9,_. ]+);";
 	
-	public static final String selectPattern = "(?i)(SELECT )[\\*]( from )([0-9a-zA-Z_]*) ([a-zA-Z]+), ([a-zA-Z]+) [a-zA-Z]+( where )([a-zA-Z]*.[0-9a-zA-Z_]*)( = )([a-zA-Z]*.[a-zA-Z_]*)";
+	public static final String selectPattern = "(?i)(SELECT )[\\*]( from )([0-9a-zA-Z_]*) ([a-zA-Z]+), ([a-zA-Z]+) [a-zA-Z]+( where )[a-zA-Z]*.([0-9a-zA-Z_]*)( = )[a-zA-Z]*.([a-zA-Z_]*)";
 	public static String[] get_search_keys(String cmd){
 		Pattern r;
 		Matcher m;
@@ -16,8 +17,8 @@ public class SelectAndSearch{
 			if(m.find()) {  //TODO handle wrong select such as SELECT * FROM Payments r, Physician m WHERE p.Physician_Name = r.Physician;
 				String table1= m.group(3);
 				String table2= m.group(5);
-				String searchKey1 = m.group(8);
-				String searchKey2= m.group(10);
+				String searchKey1 = m.group(7);
+				String searchKey2= m.group(9);
 				keys[0] = table1;
 				keys[1]= table2;
 				keys[2] = searchKey1;
@@ -44,7 +45,7 @@ public class SelectAndSearch{
 	}
 	
 	public static void searchJoin(String cmd){
-		String[] keys = get_search_keys(cmd);
+		String[] search_keys = get_search_keys(cmd);
 		String t1=search_keys[0];
 		String t2 =search_keys[1];
 		System.out.println(">>>You want to join two tables:"+t1+","+t2+" by "+search_keys[2]);
@@ -63,20 +64,16 @@ public class SelectAndSearch{
 		String key = f1.length() < f2.length() ? innerKey : outerKey;
 		t.hashIndex(key,get_filename(innerTable),innerTable);
 		long indexTime = System.currentTimeMillis() - startTime;
-		System.out.println("Finish indexing in:"+indexTime/1000+"seconds");
+		System.out.println("Finish indexing in:"+indexTime/1000.0+"seconds");
 		
-		System.out.println("Start joining");
-		long joinTime = System.currentTimeMillis();
-		// join "innerTable" and "outerTable" by attribute "key"
+		System.out.println("Start joining........");
         t.join(innerTable, outerTable, innerFile, outerFile, innerKey, outerKey);
-		long endTime   = System.currentTimeMillis();
-		long joinTime = (endTime-joinTime)/1000; 
-		System.out.println("Finish joining in "+joinTime+"seconds");
 	}
 	//java SelectAndSearch SELECT * FROM table_name WHERE Physician_Last_name=Michelle";
-/* 	public static void main(String[] args){
-		String cmd = args[0];
-		String[] search_keys = get_search_keys(cmd);
+	public static void main(String[] args){
+		String cmd = "SELECT * FROM Research p, Ownership o WHERE p.Physician_Last_Name = o.Physician_Last_Name";
+		searchJoin(cmd);
+		/* String[] search_keys = get_search_keys(cmd);
 		String tablename = search_keys[0];
 		System.out.println("Tablename of your searching:"+tablename);
 		String filename = get_filename(tablename);
@@ -95,7 +92,7 @@ public class SelectAndSearch{
 		long endTime   = System.currentTimeMillis();
 		long totalTime = (endTime-startTime)/1000; 
 		System.out.println("Finish searching");
-		System.out.println("Finish searching in "+totalTime+"seconds");
-	} */
+		System.out.println("Finish searching in "+totalTime+"seconds"); */
+	} 
 }
 

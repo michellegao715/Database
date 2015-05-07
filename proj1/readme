@@ -1,10 +1,11 @@
 1.Files:
 1.Before compile and run the program, make sure you have those files in the same directory:
 All the csv files: 
-OPPR_ALL_DTL_GNRL_12192014.csv 
-OPPR_SPLMTL_PH_PRFL_12192014.csv
-OPPR_ALL_DTL_OWNRSHP_12192014.csv
-OPPR_ALL_DTL_RSRCH_12192014.csv 
+Payments, OPPR_ALL_DTL_GNRL_12192014.csv
+Physicians, OPPR_SPLMTL_PH_PRFL_12192014.csv
+Ownership, OPPR_ALL_DTL_OWNRSHP_12192014.csv
+Research, OPPR_ALL_DTL_RSRCH_12192014.csv
+
 External jar: opencsv-3.3.jar 
 Java Files:  yousql.java SelectAndSearch.java  HashIndex.java 
 
