@@ -179,7 +179,7 @@ public class HashIndex {
 				}
 			long endTime   = System.currentTimeMillis();
 			long join = (endTime-joinTime)/1000;
-			System.out.println("Finish joining in "+join+"seconds( include time cost of printing)");
+			System.out.println("Finish joining in "+join+"seconds( include time cost of printing out results)");
 			//System.out.println("Number of matching entries is "+counter);
 			}catch(FileNotFoundException e){
 				System.out.println("Can't open:"+innerJoinFile);

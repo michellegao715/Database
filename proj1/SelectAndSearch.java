@@ -68,6 +68,7 @@ public class SelectAndSearch{
 		
 		System.out.println("Start joining........");
         t.join(innerTable, outerTable, innerFile, outerFile, innerKey, outerKey);
+		System.out.println("(Time of indexing is:"+indexTime/1000.0+"seconds)");
 	}
 	//java SelectAndSearch SELECT * FROM table_name WHERE Physician_Last_name=Michelle";
 	public static void main(String[] args){
