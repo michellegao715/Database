@@ -21,7 +21,7 @@ Usage Example:
 	Test for the biggest csv files: 
 	javac -cp .:opencsv-3.3.jar yoursql.java
 	java -cp .:opencsv-3.3.jar yoursql 
-	SELECT * FROM Physicians WHERE Physician_Last_Name=LIN;  
+	SELECT * FROM Physicians WHERE Physician_Profile_Last_Name=LIN;  
 
 3.After each running: delete all hash index file:
 Physician_xx  
@@ -32,7 +32,7 @@ If there is no searching result or typing wrong tablename or search value, the p
 5. Performance and Evaluation
 Physician Search: 
   1.Search from Physician table:(OPPR_SPLMTL_PH_PRFL_12192014.csv 1.3G)
-SELECT * FROM Physicians WHERE Physician_Last_Name=LIN;
+SELECT * FROM Physicians WHERE Physician_Profile_Last_Name=LIN;
 1.3G --> time cost: 103s(95s build index) + 8s(search) 
 
   2.Search from Ownership table: (OPPR_ALL_DTL_OWNRSHP_12192014.csv 1.5M)

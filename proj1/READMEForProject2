@@ -1,0 +1,50 @@
+Usage: 
+javac -cp .:opencsv-3.3.jar yourSQL.java 
+java -cp .:opencsv-3.3.jar yourSQL test.sql 
+
+In test.sql:
+SELECT * FROM Research p, Ownership r WHERE p.Physician_Last_Name = r.Physician_Last_Name 
+SELECT * FROM Payments t, Ownership r WHERE t.Applicable_Manufacturer_or_Applicable_GPO_Making_Payment_Name = r.Applicable_Manufacturer_or_Applicable_GPO_Making_Payment_Name
+
+In test1.sql:(test the biggest two tables Physicians and Payments cost long time so it is better to insert one query in test1.sql) 
+SELECT * FROM Payments p, Physicians r WHERE p.Physician_Last_Name = r.Physician_Profile_Last_Name
+
+Testing on lab's computer:
+Make sure you have all files in workspace:
+External jar: opencsv-3.3.jar 
+Java Files:  youSQL.java SelectAndSearch.java  HashIndex.java 
+
+Size of Tables: 
+Payments, OPPR_ALL_DTL_GNRL_12192014.csv, 1.3G 
+Physicians, OPPR_SPLMTL_PH_PRFL_12192014.csv, 74M
+Ownership, OPPR_ALL_DTL_OWNRSHP_12192014.csv, 1.5M
+Research, OPPR_ALL_DTL_RSRCH_12192014.csv, 13M
+
+Performance:
+physician: Physician_Last_Name(for Physician table: Physician_Profile_Last_Name)
+vendor: Applicable_Manufacturer_or_Applicable_GPO_Making_Payment_Name
+Table1		Table2		KeyToJoin		Time of joining(seconds)	Time of indexing(seconds)
+Ownership 	Research	physicians		12							0.205
+Ownership	Research 	vendor			8							0.189
+Ownership	Physician	physicians		157							0.196	
+Physicians	Payments	
+There is a variable:counter in join() in HashIndex class. Print out the value to get number of matching joins. 
+
+Design and implementation: 
+SelectAndSearch class:
+get_search_keys():
+I use a hashmap to save table's name and key of a joining query.
+e.g. if the query is : SELECT * FROM Physicians p, Ownership o WHERE p.Physician_Profile_Last_Name = o.Physician_Last_Name   
+the hashmap is : {Physicians:Physician_Profile_Last_Name, Payments:Physician_Last_Name}  
+
+searchJoin():
+To join two tables, the program chooses the smaller table to be inner join and build index files if there is no such index files(since there are several queries, check before generating index file), name the index file by inner table's name and key to make sure not mixing the naming of index files for same table by different keys. I use hash index and index join in my program. After building index files for inner join table, the program read the outer table line by line and compare the entry with index file of inner table to find a match and then print out.  
+
+Challenges and improvements: 
+I changed the way to read index files for each line of outer table(doing join) after running into the problem of "Open to many files". Instead of opening a file every time, I use an arraylist to save all index files of a key, and open them in advance.  
+
+Questions and thoughts:
+The reason I didn't do merge sort for outer table is the time cost of sort is O(nlog(n)), and scanning the whole file's time cost is O(n). So I only build indexed file for inner table(smaller table) since compared to building index files from bigger table will cost more time to scan. 
+
+
+

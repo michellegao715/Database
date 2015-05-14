@@ -88,7 +88,7 @@ public class HashIndex {
 		try {
 			ArrayList<BufferedWriter> outputs = new ArrayList<BufferedWriter>();
 			for (int i = 0;i < hashSize; ++i) {
-				String index_file_name = tablename+"_"+i;
+				String index_file_name = tablename+"_"+key+"_"+i;
 				File index_file = new File(index_file_name);
 				index_file.createNewFile();
 				FileWriter fw = new FileWriter(index_file.getAbsolutePath(),true);
@@ -128,8 +128,12 @@ public class HashIndex {
 			System.out.println("IOException:"+e.toString());
 		}
 	}
+	public static void old_join(String innerTable, String outerTablem, String innerFile, String outerFile, String innerKey, String outerKey){
+		System.out.println("pass ");
+	}
 	// iterate through each line of outerTable(read from csv), hash the value of the attribute and search in index files of inner table
 	public static void join(String innerTable, String outerTable,String innerFile, String outerFile, String innerKey, String outerKey){
+		//System.out.println("In join() function of HashIndex.java");
 		long joinTime = System.currentTimeMillis();
 		String attributeLineOuter = getFirstLine(outerFile);
 		String attributeLineInner = getFirstLine(innerFile);
@@ -137,7 +141,6 @@ public class HashIndex {
 		int posKeyInner = getIndexOfKey(innerKey, attributeLineInner);
 		//System.out.println("pos of "+outerKey+" in "+outerFile+" is:"+posKeyOuter);
 		//System.out.println("pos of "+innerKey+" in "+innerFile+" is:"+posKeyInner);
-
 		if(posKeyOuter < 0) {
 			System.err.println(">>>Failed to find the attribute "+outerKey+" in the table "+outerTable);
 			System.exit(1);
@@ -160,7 +163,7 @@ public class HashIndex {
 				}
 				//System.out.println(matchingResults.toString());
 				int targetHash = Math.abs(hashcode(outerLine[posKeyOuter]));
-				innerJoinFile = innerTable+"_"+targetHash;
+				innerJoinFile = innerTable+"_"+innerKey+"_"+targetHash;
 				String l = "";
 				innerReader = new BufferedReader(new FileReader(innerJoinFile));
 				while((l = innerReader.readLine()) != null ){
@@ -179,7 +182,8 @@ public class HashIndex {
 				}
 			long endTime   = System.currentTimeMillis();
 			long join = (endTime-joinTime)/1000;
-			System.out.println("Finish joining in "+join+"seconds( include time cost of printing out results)");
+			System.out.println("There are "+counter+" matching results for joining "+outerTable+" and "+innerTable+" by key "+innerKey);
+			System.out.println("Finish joining "+"Table "+innerTable+" and Table "+outerTable+" by key "+innerKey+" in "+join+"seconds( include time cost of printing out results)");
 			//System.out.println("Number of matching entries is "+counter);
 			}catch(FileNotFoundException e){
 				System.out.println("Can't open:"+innerJoinFile);
